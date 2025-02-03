@@ -48,6 +48,8 @@ func formatter(ent logging.Entry) (string, error) {
 						return 33
 					} else if ent.Level == logging.ErrorLevel {
 						return 31
+					} else if ent.Level == logging.FatalLevel {
+						return 31
 					} else {
 						return 37
 					}

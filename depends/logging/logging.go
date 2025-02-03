@@ -16,6 +16,7 @@ const (
 	InfoLevel  Level = zapcore.InfoLevel
 	WarnLevel  Level = zapcore.WarnLevel
 	ErrorLevel Level = zapcore.ErrorLevel
+	FatalLevel Level = zapcore.FatalLevel
 )
 
 type Logger struct {

@@ -173,8 +173,9 @@ func (s *Server) ListenAndServe() {
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
-			fmt.Println(fmt.Sprintf("\033[%dm[%v] %v\033[0m", 30+1, time.Now().Format("2006-01-02 15:04:05"), err.Error()))
-			os.Exit(-1)
+			//fmt.Println(fmt.Sprintf("\033[%dm[%v] %v\033[0m", 30+1, time.Now().Format("2006-01-02 15:04:05"), err.Error()))
+			//os.Exit(-1)
+			logging.Fatal(err.Error())
 		}
 	}()
 	fmt.Println(fmt.Sprintf("\033[%dm[%v] %v\033[0m", 30+4, time.Now().Format("2006-01-02 15:04:05"), fmt.Sprintf("Server Listen %v", srv.Addr)))
@@ -185,7 +186,8 @@ func (s *Server) ListenAndServe() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		fmt.Println(fmt.Sprintf("\033[%dm[%v] %v\033[0m", 30+1, time.Now().Format("2006-01-02 15:04:05"), err.Error()))
-		os.Exit(-1)
+		//fmt.Println(fmt.Sprintf("\033[%dm[%v] %v\033[0m", 30+1, time.Now().Format("2006-01-02 15:04:05"), err.Error()))
+		//os.Exit(-1)
+		logging.Fatal(err.Error())
 	}
 }
