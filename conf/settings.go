@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gsadism/open-admin/addons/uni"
 	"github.com/gsadism/open-admin/addons/web"
 	"github.com/gsadism/open-admin/depends/logging"
 	"github.com/gsadism/open-admin/depends/t"
@@ -60,6 +61,8 @@ func formatter(ent logging.Entry) (string, error) {
 
 var APPS = []t.Q{
 	web.APP,
+
+	uni.APP,
 }
 
 // MIDDLEWARE : 全局中间件

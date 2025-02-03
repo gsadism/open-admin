@@ -13,5 +13,6 @@ func router(r *gin.RouterGroup) {
 	osGroup := r.Group("/")
 	{
 		osGroup.GET("ping", osAPI.Ping)
+		osGroup.GET("rsa", osAPI.PublicKey)
 	}
 }

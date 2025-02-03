@@ -37,6 +37,8 @@ func Execute() {
 					Debug: v.GetBool("server.debug"),
 					Host:  v.GetString("server.host"),
 					Port:  v.GetInt("server.port"),
+
+					Resource: v.GetString("resource.dir"),
 				}).Middleware(conf.MIDDLEWARE...).Routers(func() []func(*gin.RouterGroup) {
 					s := make([]func(*gin.RouterGroup), 0)
 					for _, app := range conf.APPS {

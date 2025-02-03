@@ -4,3 +4,6 @@ server:
 
   debug: true
 
+# 资源文件存放路径
+resource:
+  dir: G:\github\open-admin\resource
