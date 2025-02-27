@@ -1,0 +1,5 @@
+root:
+  # 超级管理员(root)用户密码, 请使用 <go run main.go super -p 明文密码> 进行加密后粘贴至此处
+  # 为空则该服务无法以root用户进行登录,如果您的服务负载均衡到多台服务器上,请保证该配置相同.
+  password: $2a$10$SuUwLbJoFQ00LhLZysjr2.29HvUhu8v5PpKB5vAQ3XN79Rk498RRi
+
