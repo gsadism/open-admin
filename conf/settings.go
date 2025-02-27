@@ -1,0 +1,5 @@
+package conf
+
+var (
+	SECRET_KEY = "28c589c71a6f86f269047960cdf001d4437a0b8b2418ca8db9bb5336dd47480b"
+)
