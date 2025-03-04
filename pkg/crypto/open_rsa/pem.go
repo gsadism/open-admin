@@ -1,4 +1,4 @@
-package _rsa
+package open_rsa
 
 import (
 	"crypto/rand"
@@ -41,6 +41,18 @@ func PublicKeyWithString(PublicKey *rsa.PublicKey) (string, error) {
 	} else {
 		pemBytes := pem.EncodeToMemory(&pem.Block{
 			Type:  "RSA PUBLIC KEY",
+			Bytes: asn,
+		})
+		return string(pemBytes), nil
+	}
+}
+
+func PrivateKeyWithString(PrivateKey *rsa.PrivateKey) (string, error) {
+	if asn, err := x509.MarshalPKCS8PrivateKey(PrivateKey); err != nil {
+		return "", err
+	} else {
+		pemBytes := pem.EncodeToMemory(&pem.Block{
+			Type:  "RSA PRIVATE KEY",
 			Bytes: asn,
 		})
 		return string(pemBytes), nil

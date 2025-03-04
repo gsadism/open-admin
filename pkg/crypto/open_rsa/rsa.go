@@ -1,4 +1,4 @@
-package _rsa
+package open_rsa
 
 import (
 	"bytes"

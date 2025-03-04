@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"github.com/gsadism/open-admin/core/debug"
 	"github.com/gsadism/open-admin/pkg/crypto/open_aes"
+	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
 	"github.com/gsadism/open-admin/pkg/crypto/open_salt"
+	"github.com/gsadism/open-admin/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 )
 
 func ReadApplicationFile(fileName string) (*viper.Viper, error) {
@@ -33,12 +36,16 @@ func SuperAdminPasswordCommand() *cobra.Command {
 		Args: cobra.ArbitraryArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			if Password == "" {
-				debug.Error("the password cannot be empty")
+				debug.ErrorE("the password cannot be empty")
 			} else {
 				if pwd, err := open_salt.Encrypt(Password); err != nil {
-					debug.Error(err.Error())
+					debug.ErrorE(err.Error())
 				} else {
-					debug.Debug(fmt.Sprintf("super password: %s", pwd))
+					if err := utils.WriteSettingsVal(filepath.Join(os.Getenv("OPEN_ADMIN_ROOT"), "conf", "settings.go"), "SUPER_ADMIN_PASSWORD", pwd); err != nil {
+						debug.ErrorE(err.Error())
+					} else {
+						debug.Debug("writing the super admin password succeeds")
+					}
 				}
 			}
 		},
@@ -56,7 +63,12 @@ func SecretCommand() *cobra.Command {
 			if key, err := open_aes.Secret(2 * aes.BlockSize); err != nil {
 				debug.Error(err.Error())
 			} else {
-				debug.Debug(fmt.Sprintf("SECRET_KEY: %s", key))
+				if err := utils.WriteSettingsVal(filepath.Join(os.Getenv("OPEN_ADMIN_ROOT"), "conf", "settings.go"), "SECRET_KEY", key); err != nil {
+					debug.ErrorE(err.Error())
+				} else {
+					debug.Debug("writing the secret key succeeds")
+				}
+				//debug.Debug(fmt.Sprintf("SECRET_KEY: %s", key))
 			}
 		},
 	}
@@ -72,7 +84,36 @@ func IVCommand() *cobra.Command {
 			if iv, err := open_aes.Secret(aes.BlockSize); err != nil {
 				debug.Error(err.Error())
 			} else {
-				debug.Debug(fmt.Sprintf("SECRET_IV: %s", iv))
+				if err := utils.WriteSettingsVal(filepath.Join(os.Getenv("OPEN_ADMIN_ROOT"), "conf", "settings.go"), "SECRET_IV", iv); err != nil {
+					debug.ErrorE(err.Error())
+				} else {
+					debug.Debug("writing the secret iv succeeds")
+				}
+			}
+		},
+	}
+	return c
+}
+
+// RSACommand : 生成RSA 秘钥
+func RSACommand() *cobra.Command {
+	c := &cobra.Command{
+		Use:  "rsa",
+		Args: cobra.ArbitraryArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			prv, pub := open_rsa.Generate(open_rsa.MEDIUM)
+			PublicKey, err := open_rsa.PublicKeyWithString(pub)
+			if err != nil {
+				debug.ErrorE(err.Error())
+			}
+			PrivateKey, err := open_rsa.PrivateKeyWithString(prv)
+			if err != nil {
+				debug.ErrorE(err.Error())
+			}
+			if err := utils.WriteSettingsRsa(filepath.Join(os.Getenv("OPEN_ADMIN_ROOT"), "conf", "settings.go"), PrivateKey, PublicKey); err != nil {
+				debug.ErrorE(err.Error())
+			} else {
+				debug.Debug("writing the rsa key succeeds")
 			}
 		},
 	}
@@ -80,6 +121,8 @@ func IVCommand() *cobra.Command {
 }
 
 func Command() *cobra.Command {
+	var ConfigFilePath string
+
 	c := &cobra.Command{
 		Use:  "server",
 		Args: cobra.ArbitraryArgs,
@@ -91,7 +134,9 @@ func Command() *cobra.Command {
 		SecretCommand(),
 		SuperAdminPasswordCommand(),
 		IVCommand(),
+		RSACommand(),
 	)
+	c.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "config file path")
 	return c
 }
 
