@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gsadism/open-admin/core/base"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,9 @@ import (
 type Server struct {
 	addr string
 
-	e *gin.Engine
+	e          *gin.Engine
+	middleware []gin.HandlerFunc
+	routers    []func(*gin.RouterGroup)
 }
 
 func New(cnf *Config) *Server {
@@ -24,18 +27,47 @@ func New(cnf *Config) *Server {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	s := &Server{
-		addr: fmt.Sprintf("%s:%d", cnf.host, cnf.port),
-		e:    gin.New(),
+		addr:       fmt.Sprintf("%s:%d", cnf.host, cnf.port),
+		e:          gin.New(),
+		middleware: make([]gin.HandlerFunc, 0),
+		routers:    make([]func(*gin.RouterGroup), 0),
 	}
+
+	// 注册基础路由
+	s.Routers(base.Router)
 
 	return s
 }
 
-func (s *Server) GC() {
+func (s *Server) Middleware(fn ...gin.HandlerFunc) *Server {
+	s.middleware = append(s.middleware, fn...)
+	return s
+}
 
+func (s *Server) Routers(fn ...func(*gin.RouterGroup)) *Server {
+	s.routers = append(s.routers, fn...)
+	return s
+}
+
+func (s *Server) GC() {
+	s.routers = nil
+}
+
+func (s *Server) Run() error {
+	// 注册中间件
+	s.e.Use(s.middleware...)
+	// 注册路由
+	for _, fn := range s.routers {
+		fn(s.e.Group("/"))
+	}
+	s.GC()
+	return nil
 }
 
 func (s *Server) ListenAndServer() {
+	if err := s.Run(); err != nil {
+		log.Fatalln(err)
+	}
 	srv := http.Server{
 		Addr:    s.addr,
 		Handler: s.e,
