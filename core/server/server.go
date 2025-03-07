@@ -6,13 +6,20 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gsadism/open-admin/core/base"
+	"github.com/gsadism/open-admin/pkg/file"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 )
+
+type StaticFile struct {
+	RelativePath string
+	FilePath     string
+}
 
 type Server struct {
 	addr string
@@ -20,6 +27,7 @@ type Server struct {
 	e          *gin.Engine
 	middleware []gin.HandlerFunc
 	routers    []func(*gin.RouterGroup)
+	files      []StaticFile
 }
 
 func New(cnf *Config) *Server {
@@ -31,6 +39,7 @@ func New(cnf *Config) *Server {
 		e:          gin.New(),
 		middleware: make([]gin.HandlerFunc, 0),
 		routers:    make([]func(*gin.RouterGroup), 0),
+		files:      make([]StaticFile, 0),
 	}
 
 	// 注册基础路由
@@ -49,13 +58,36 @@ func (s *Server) Routers(fn ...func(*gin.RouterGroup)) *Server {
 	return s
 }
 
+func (s *Server) Files(RelativePath, FilePath string) *Server {
+	if !filepath.IsAbs(FilePath) {
+		if d, err := filepath.Abs(FilePath); err != nil {
+			log.Println(err.Error())
+		} else {
+			FilePath = d
+		}
+	}
+	if file.Exists(FilePath) {
+		s.files = append(s.files, StaticFile{
+			RelativePath: RelativePath,
+			FilePath:     FilePath,
+		})
+	}
+	return s
+}
+
 func (s *Server) GC() {
 	s.routers = nil
+	s.middleware = nil
+	s.files = nil
 }
 
 func (s *Server) Run() error {
 	// 注册中间件
 	s.e.Use(s.middleware...)
+	// 注册static file
+	for _, f := range s.files {
+		s.e.StaticFile(f.RelativePath, f.FilePath)
+	}
 	// 注册路由
 	for _, fn := range s.routers {
 		fn(s.e.Group("/"))

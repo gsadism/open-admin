@@ -4,3 +4,6 @@ server:
   # 是否开启调试模式, 线上环境请设置为false
   debug: true
 
+website:
+  favicon: ./dist/favicon.ico
+  robots: ./dist/robots.txt
