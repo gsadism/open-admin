@@ -8,6 +8,7 @@ import (
 func Server(v *viper.Viper) {
 
 	srv := server.New(server.NewConfig().
+		SetDebug(v.GetBool("server.debug")).
 		SetHost(v.GetString("server.host")).
 		SetPort(v.GetInt("server.port")))
 

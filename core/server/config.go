@@ -5,14 +5,22 @@ import "net"
 type Config struct {
 	host string
 	port int
+
+	debug bool
 }
 
 func NewConfig() *Config {
 	c := &Config{
-		host: "0.0.0.0",
-		port: 9815,
+		host:  "0.0.0.0",
+		port:  9815,
+		debug: false,
 	}
 
+	return c
+}
+
+func (c *Config) SetDebug(debug bool) *Config {
+	c.debug = debug
 	return c
 }
 

@@ -20,8 +20,12 @@ type Server struct {
 }
 
 func New(cnf *Config) *Server {
+	if !cnf.debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	s := &Server{
 		addr: fmt.Sprintf("%s:%d", cnf.host, cnf.port),
+		e:    gin.New(),
 	}
 
 	return s
