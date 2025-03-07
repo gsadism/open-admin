@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"github.com/gsadism/open-admin/conf"
+	"github.com/gsadism/open-admin/core/db"
 	"github.com/gsadism/open-admin/core/server"
 	"github.com/gsadism/open-admin/osv"
 	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
@@ -41,6 +42,26 @@ func OsRSA(PublicKeyPath, PrivateKeyPath string) (*rsa.PublicKey, *rsa.PrivateKe
 }
 
 func Server(v *viper.Viper) {
+	// db
+	if client, err := db.Client(
+		v.GetString("database.driver"),
+		v.GetString("database.host"),
+		v.GetInt("database.port"),
+		v.GetString("database.username"),
+		v.GetString("database.password"),
+		v.GetString("database.db"),
+		v.GetString("database.charset"),
+		v.GetInt("database.max-open"),
+		v.GetInt("database.max-idle"),
+		v.GetInt("database.max-idle-time"),
+		v.GetInt("database.max-life-time"),
+		conf.GORM,
+	); err != nil {
+		log.Fatal(err)
+	} else {
+		osv.DB.Init(client)
+	}
+	
 	// rsa
 	osv.Rsa.Init(OsRSA(v.GetString("secret.public_key"), v.GetString("secret.private_key")))
 
