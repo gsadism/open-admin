@@ -7,3 +7,7 @@ server:
 website:
   favicon: ./dist/favicon.ico
   robots: ./dist/robots.txt
+
+secret:
+  public_key: ./dist/secret/public_key.pem
+  private_key: ./dist/secret/private_key.pem
