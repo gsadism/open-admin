@@ -11,5 +11,6 @@ func Router(r *gin.RouterGroup) {
 	{
 		v1.GET("ping", coreAPIV1.Ping)
 		v1.GET("secret", coreAPIV1.PublicKey)
+		v1.GET("verify", coreAPIV1.VerificationCode)
 	}
 }

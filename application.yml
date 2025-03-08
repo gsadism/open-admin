@@ -9,6 +9,10 @@ website:
   robots: ./dist/robots.txt
   tft: ./dist/SIMYOU.TTF
 
+snowflake:
+  machine: 1
+  service: 1
+
 secret:
   public_key: ./dist/secret/public_key.pem
   private_key: ./dist/secret/private_key.pem

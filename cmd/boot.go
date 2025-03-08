@@ -12,6 +12,8 @@ import (
 	"github.com/gsadism/open-admin/pkg/crypto/open_aes"
 	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
 	"github.com/gsadism/open-admin/pkg/file"
+	"github.com/gsadism/open-admin/pkg/image"
+	"github.com/gsadism/open-admin/pkg/next/snowflake"
 	"github.com/spf13/viper"
 	"log"
 	"runtime"
@@ -96,6 +98,16 @@ func Server(v *viper.Viper) {
 
 	// rsa
 	osv.Rsa.Init(RSA(v.GetString("secret.public_key"), v.GetString("secret.private_key")))
+
+	// snow flake
+	osv.SnowFlake.Init(snowflake.New(v.GetInt64("snowflake.machine"), v.GetInt64("snowflake.service")))
+
+	// gg
+	if dir, err := file.Abs(v.GetString("website.tft")); err != nil {
+		log.Fatal(err)
+	} else {
+		osv.Image.Init(image.NewGG(dir), osv.Redis.Client())
+	}
 
 	srv := server.New(server.NewConfig().
 		SetDebug(v.GetBool("server.debug")).
