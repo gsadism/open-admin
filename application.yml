@@ -17,7 +17,8 @@ database:
   host: 192.168.255.129
   port: 3306
   username: root
-  password: root
+  # 使用 go run .\main.go encipher -p 明文密码进行加密
+  password: ReLfAqFpBpwL/FTk2KFnpw==
   db: uat
   charset: utf8mb4
   # 连接池最多同时打开的连接数,设置应比服务器的max_connections小.

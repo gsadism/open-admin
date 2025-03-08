@@ -7,6 +7,7 @@ import (
 	"github.com/gsadism/open-admin/core/db"
 	"github.com/gsadism/open-admin/core/server"
 	"github.com/gsadism/open-admin/osv"
+	"github.com/gsadism/open-admin/pkg/crypto/open_aes"
 	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
 	"github.com/gsadism/open-admin/pkg/file"
 	"github.com/spf13/viper"
@@ -48,7 +49,14 @@ func Server(v *viper.Viper) {
 		v.GetString("database.host"),
 		v.GetInt("database.port"),
 		v.GetString("database.username"),
-		v.GetString("database.password"),
+		func() string {
+			if pwd, err := open_aes.DecryptECB(v.GetString("database.password"), conf.SECRET_KEY); err != nil {
+				log.Fatal(err)
+				return ""
+			} else {
+				return pwd
+			}
+		}(),
 		v.GetString("database.db"),
 		v.GetString("database.charset"),
 		v.GetInt("database.max-open"),
@@ -61,7 +69,7 @@ func Server(v *viper.Viper) {
 	} else {
 		osv.DB.Init(client)
 	}
-	
+
 	// rsa
 	osv.Rsa.Init(OsRSA(v.GetString("secret.public_key"), v.GetString("secret.private_key")))
 

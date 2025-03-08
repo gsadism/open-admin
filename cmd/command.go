@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"crypto/aes"
 	"errors"
 	"fmt"
+	"github.com/gsadism/open-admin/conf"
+	"github.com/gsadism/open-admin/pkg/crypto/open_aes"
 	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
 	"github.com/gsadism/open-admin/pkg/file"
 	"github.com/spf13/cobra"
@@ -50,6 +53,41 @@ func OpenAdminRsaGenerateKeyCommand() *cobra.Command {
 	return c
 }
 
+func OpenAdminSecretGenerateKeyCommand() *cobra.Command {
+	c := &cobra.Command{
+		Use:  "secret-generate-key",
+		Args: cobra.ArbitraryArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			if key, err := open_aes.Secret(2 * aes.BlockSize); err != nil {
+				log.Fatal(err.Error())
+			} else {
+				log.Println(fmt.Sprintf("SECRET_KEY: %s", key))
+			}
+		},
+	}
+	return c
+}
+
+func OpenAdminEncipherCommand() *cobra.Command {
+	var Password string
+	c := &cobra.Command{
+		Use:  "encipher",
+		Args: cobra.ArbitraryArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			if Password == "" {
+				log.Fatal("lease configure the text to be encrypted correctly. <-c Encrypted text>")
+			}
+			if cipher, err := open_aes.EncryptECB(Password, conf.SECRET_KEY); err != nil {
+				log.Fatal(err.Error())
+			} else {
+				fmt.Println(fmt.Sprintf("Encrypted Text: %s", cipher))
+			}
+		},
+	}
+	c.PersistentFlags().StringVarP(&Password, "password", "p", "", " encrypt text.")
+	return c
+}
+
 func OpenAdminServerCommand() *cobra.Command {
 	var ConfigFilePath string
 	c := &cobra.Command{
@@ -65,7 +103,7 @@ func OpenAdminServerCommand() *cobra.Command {
 	}
 	c.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "config file path")
 
-	c.AddCommand(OpenAdminRsaGenerateKeyCommand())
+	c.AddCommand(OpenAdminRsaGenerateKeyCommand(), OpenAdminSecretGenerateKeyCommand(), OpenAdminEncipherCommand())
 
 	return c
 }
