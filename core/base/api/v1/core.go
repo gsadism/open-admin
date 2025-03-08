@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gsadism/open-admin/osv"
 )
@@ -62,15 +63,27 @@ func (Core) WebSite(ctx *gin.Context) {
 		}
 	}()
 	db := osv.DB.WithContext(context.WithValue(context.TODO(), "sudo", true))
+	// 查询结构体
 	var Query struct {
-		Title   string `json:"title"`
-		Company string `json:"company"`
-		ICP     string `json:"icp"`
+		Title      string `json:"title"`
+		Company    string `json:"company"`
+		ICP        string `json:"icp"`
+		Logo       string `json:"logo"`
+		Background string `json:"background"`
 	}
-	db.Table("ir_website_setting").First(&Query)
-	ctx.JSON(200, gin.H{
-		"message": "ok.",
-		"code":    200,
-		"data":    Query,
-	})
+	if err := db.Table("ir_website_setting").First(&Query).Error; err != nil {
+		ctx.JSON(200, gin.H{
+			"message": "fail.",
+			"code":    1001,
+			"data":    gin.H{},
+		})
+	} else {
+		Query.Logo = fmt.Sprintf("%s/%s", osv.Minio.Domain(), Query.Logo)
+		Query.Background = fmt.Sprintf("%s/%s", osv.Minio.Domain(), Query.Background)
+		ctx.JSON(200, gin.H{
+			"message": "ok.",
+			"code":    200,
+			"data":    Query,
+		})
+	}
 }

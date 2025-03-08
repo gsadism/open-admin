@@ -9,10 +9,10 @@ server:
   pool: 20  # 最大使用协程数
 
 website:
+  static_dir: ./dist/static  # web初始化常用资源路径
   favicon: ./dist/favicon.ico
   robots: ./dist/robots.txt
-  logo: ./dist/logo.png
-  tft: ./dist/SIMYOU.TTF
+  tft: ./dist/SIMYOU.TTF  # 图片验证码字体文件
 
 snowflake:
   machine: 1
@@ -53,3 +53,12 @@ redis:
   port: 6379
   # 使用 go run .\main.go encipher -p 明文密码进行加密
   password: ReLfAqFpBpwL/FTk2KFnpw==
+
+minio:
+  web: http://40on04289kc4.vicp.fun  # 访或代理minio服务器
+  host: 192.168.255.129
+  port: 9000
+  username: root
+  password: 2BxJS/ivhAmTIcI2LSgIIbgMVDryONnzrYrkBKEiA3w=
+  token:  # 为空即可
+  ssl: false

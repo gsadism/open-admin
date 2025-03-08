@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gsadism/open-admin/conf"
+	"github.com/gsadism/open-admin/logging"
 	"github.com/gsadism/open-admin/pkg/crypto/open_aes"
 	"github.com/gsadism/open-admin/pkg/crypto/open_rsa"
 	"github.com/gsadism/open-admin/pkg/file"
@@ -110,6 +111,21 @@ func OpenAdminServerCommand() *cobra.Command {
 
 func Execute(dir string) {
 	_ = os.Setenv("OPEN_ADMIN_ROOT", dir)
+	// 日志记录器初始化
+	logging.ReplaceGlobals(logging.New().
+		SetSkip(2).
+		Default(conf.LogConsoleLevel).
+		Console(conf.LogConsoleLevel, conf.Formatter).
+		File(
+			filepath.Join(dir, "logs"),
+			conf.FileName,
+			conf.LogFileLevel,
+			conf.MaxSize,
+			conf.MaxBackups,
+			conf.MaxAge,
+			conf.Compress,
+		).
+		R())
 
 	if err := OpenAdminServerCommand().Execute(); err != nil {
 		log.Fatal(err)

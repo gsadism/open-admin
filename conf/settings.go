@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gsadism/open-admin/core/base"
 	"github.com/gsadism/open-admin/core/model"
+	"github.com/gsadism/open-admin/logging"
 	"github.com/gsadism/open-admin/middleware"
 	"github.com/gsadism/open-admin/pkg/array"
 	"gorm.io/gorm"
@@ -35,6 +36,29 @@ var MIDDLEWARE = []gin.HandlerFunc{
 
 	middleware.Cors(),
 }
+
+/*====================== Logger ======================*/
+
+// LogConsoleLevel : 控制台日志输出级别
+var LogConsoleLevel = logging.DebugLevel
+
+// LogFileLevel : 文件日志输出级别
+var LogFileLevel = logging.ErrorLevel
+
+// FileName : 日志文件名称
+var FileName string = "open-admin.log"
+
+// MaxSize : 日志文件达到的最大大小,以MB为单位
+var MaxSize int = 1024
+
+// MaxBackups : 留存的旧日志文件最大数量
+var MaxBackups int = 30
+
+// MaxAge : 旧日志文件的最大保存天数
+var MaxAge int = 7
+
+// Compress : 是否压缩日志文件
+var Compress bool = false
 
 // GORM 配置
 var GORM = &gorm.Config{
