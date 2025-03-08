@@ -2,7 +2,10 @@ package conf
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gsadism/open-admin/core/base"
+	"github.com/gsadism/open-admin/core/model"
 	"github.com/gsadism/open-admin/middleware"
+	"github.com/gsadism/open-admin/pkg/array"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -12,6 +15,18 @@ import (
 const (
 	// SECRET_KEY : 系统秘钥,请妥善保存务泄露. 可通过go run main.go secret-generate-key 生成新的秘钥粘贴至此处
 	SECRET_KEY = "b2440c871401ef5c82b44732fe714a18f8ffef6922eef9e7c4fb4e34d639a1c2"
+)
+
+var ROUTERS = []func(*gin.RouterGroup){
+	base.Router,
+}
+
+var HOOKS = array.Merge[func()](
+	base.Hooks,
+)
+
+var MODELS = array.Merge[model.IModel](
+	base.Models,
 )
 
 var MIDDLEWARE = []gin.HandlerFunc{

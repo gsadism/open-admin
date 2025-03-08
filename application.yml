@@ -4,9 +4,14 @@ server:
   # 是否开启调试模式, 线上环境请设置为false
   debug: true
 
+  auto_migrate: true  # 是否自动迁移数据库
+
+  pool: 20  # 最大使用协程数
+
 website:
   favicon: ./dist/favicon.ico
   robots: ./dist/robots.txt
+  logo: ./dist/logo.png
   tft: ./dist/SIMYOU.TTF
 
 snowflake:

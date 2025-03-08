@@ -5,13 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gsadism/open-admin/core/base"
+	"github.com/gsadism/open-admin/core/model"
 	"github.com/gsadism/open-admin/pkg/file"
+	"github.com/panjf2000/ants/v2"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -24,10 +27,14 @@ type StaticFile struct {
 type Server struct {
 	addr string
 
+	pSize int
+
 	e          *gin.Engine
 	middleware []gin.HandlerFunc
 	routers    []func(*gin.RouterGroup)
 	files      []StaticFile
+
+	hooks []func()
 }
 
 func New(cnf *Config) *Server {
@@ -36,15 +43,22 @@ func New(cnf *Config) *Server {
 	}
 	s := &Server{
 		addr:       fmt.Sprintf("%s:%d", cnf.host, cnf.port),
+		pSize:      2,
 		e:          gin.New(),
 		middleware: make([]gin.HandlerFunc, 0),
 		routers:    make([]func(*gin.RouterGroup), 0),
 		files:      make([]StaticFile, 0),
+		hooks:      make([]func(), 0),
 	}
 
 	// 注册基础路由
-	s.Routers(base.Router)
+	// s.Routers(base.Router)
 
+	return s
+}
+
+func (s *Server) SetPoolSize(size int) *Server {
+	s.pSize = size
 	return s
 }
 
@@ -75,13 +89,49 @@ func (s *Server) Files(RelativePath, FilePath string) *Server {
 	return s
 }
 
+func (s *Server) Hoos(fn ...func()) *Server {
+	s.hooks = append(s.hooks, fn...)
+	return s
+}
+
 func (s *Server) GC() {
 	s.routers = nil
 	s.middleware = nil
 	s.files = nil
+	s.hooks = nil
+}
+
+func (s *Server) AutoMigrate(client *gorm.DB, auto bool, models ...model.IModel) *Server {
+	if auto {
+		for _, table := range models {
+			_ = client.AutoMigrate(table)
+		}
+	}
+
+	return s
+}
+
+func (s *Server) RunHooks() {
+	if p, err := ants.NewPool(s.pSize, ants.WithPreAlloc(true)); err != nil {
+		log.Fatal(err.Error())
+	} else {
+		defer p.Release()
+
+		var wg sync.WaitGroup
+		for _, fn := range s.hooks {
+			wg.Add(1)
+			_ = ants.Submit(func() {
+				defer wg.Done()
+				fn()
+			})
+		}
+		wg.Wait()
+	}
 }
 
 func (s *Server) Run() error {
+	// 执行预加载hooks
+	s.RunHooks()
 	// 注册中间件
 	s.e.Use(s.middleware...)
 	// 注册static file

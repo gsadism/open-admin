@@ -113,9 +113,14 @@ func Server(v *viper.Viper) {
 		SetDebug(v.GetBool("server.debug")).
 		SetHost(v.GetString("server.host")).
 		SetPort(v.GetInt("server.port"))).
+		SetPoolSize(v.GetInt("server.pool")).
 		Middleware(conf.MIDDLEWARE...).
 		Files("favicon.ico", v.GetString("website.favicon")).
-		Files("robots.txt", v.GetString("website.robots"))
+		Files("robots.txt", v.GetString("website.robots")).
+		Files("logo", v.GetString("website.logo")).
+		Routers(conf.ROUTERS...).
+		AutoMigrate(osv.DB.WithContext(context.WithValue(context.TODO(), "sudo", true)), v.GetBool("server.auto_migrate"), conf.MODELS...).
+		Hoos(conf.HOOKS...)
 
 	// 强行GC
 	runtime.GC()
