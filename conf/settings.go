@@ -45,6 +45,9 @@ var LogConsoleLevel = logging.DebugLevel
 // LogFileLevel : 文件日志输出级别
 var LogFileLevel = logging.ErrorLevel
 
+// FileDir : 日志文件存放路径
+var FileDir = "./logs"
+
 // FileName : 日志文件名称
 var FileName string = "open-admin.log"
 

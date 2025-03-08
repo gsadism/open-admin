@@ -2,7 +2,6 @@ package logging
 
 import (
 	"fmt"
-	"github.com/gsadism/open-admin/pkg/file"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -82,12 +81,6 @@ func (l *Logger) File(
 	MaxAge int,
 	Compress bool,
 ) *Logger {
-	if file.Exists(Dir) {
-		if err := os.MkdirAll(Dir, os.ModeDir); err != nil {
-			fmt.Println(err.Error())
-			os.Exit(-1)
-		}
-	}
 	l.cores["file"] = zapcore.NewCore(zapcore.NewJSONEncoder(l.config()), zapcore.AddSync(&lumberjack.Logger{
 		Filename:   filepath.Join(Dir, FileName),
 		MaxSize:    MaxSize,

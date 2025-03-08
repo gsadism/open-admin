@@ -117,7 +117,14 @@ func Execute(dir string) {
 		Default(conf.LogConsoleLevel).
 		Console(conf.LogConsoleLevel, conf.Formatter).
 		File(
-			filepath.Join(dir, "logs"),
+			func() string {
+				if d, err := file.Folder(conf.FileDir); err != nil {
+					od, _ := file.Folder("./logs")
+					return od
+				} else {
+					return d
+				}
+			}(),
 			conf.FileName,
 			conf.LogFileLevel,
 			conf.MaxSize,
