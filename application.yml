@@ -7,6 +7,7 @@ server:
 website:
   favicon: ./dist/favicon.ico
   robots: ./dist/robots.txt
+  tft: ./dist/SIMYOU.TTF
 
 secret:
   public_key: ./dist/secret/public_key.pem
@@ -37,3 +38,9 @@ database:
   # 特别是在高并发场景下，可以有效管理连接的生命周期，减少资源浪费和潜在的性能问题.
   # 设置为0,表示不限制连接的使用时长.这意味着连接可以一直使用,直到显式关闭.
   max-lift-time: 60
+
+redis:
+  host: 192.168.255.129
+  port: 6379
+  # 使用 go run .\main.go encipher -p 明文密码进行加密
+  password: ReLfAqFpBpwL/FTk2KFnpw==

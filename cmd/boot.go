@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"crypto/rsa"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gsadism/open-admin/conf"
 	"github.com/gsadism/open-admin/core/db"
 	"github.com/gsadism/open-admin/core/server"
@@ -15,7 +17,7 @@ import (
 	"runtime"
 )
 
-func OsRSA(PublicKeyPath, PrivateKeyPath string) (*rsa.PublicKey, *rsa.PrivateKey) {
+func RSA(PublicKeyPath, PrivateKeyPath string) (*rsa.PublicKey, *rsa.PrivateKey) {
 	if file.Exists(PublicKeyPath) && file.Exists(PrivateKeyPath) {
 		pub, err := open_rsa.LoadPKIXPublicKeyWithFile(PublicKeyPath)
 		if err != nil {
@@ -39,6 +41,25 @@ func OsRSA(PublicKeyPath, PrivateKeyPath string) (*rsa.PublicKey, *rsa.PrivateKe
 	} else {
 		log.Fatal(fmt.Errorf("secret path ont exists"))
 		return nil, nil
+	}
+}
+
+func Redis(host string, port int, password string) *redis.Client {
+	if pwd, err := open_aes.DecryptECB(password, conf.SECRET_KEY); err != nil {
+		log.Fatal(err)
+		return nil
+	} else {
+		rds := redis.NewClient(&redis.Options{
+			Addr:     fmt.Sprintf("%s:%d", host, port),
+			Password: pwd,
+			DB:       0,
+		})
+		if _, err := rds.Ping(context.TODO()).Result(); err != nil {
+			log.Fatal(err.Error())
+			return nil
+		} else {
+			return rds
+		}
 	}
 }
 
@@ -70,8 +91,11 @@ func Server(v *viper.Viper) {
 		osv.DB.Init(client)
 	}
 
+	// redis
+	osv.Redis.Init(Redis(v.GetString("redis.host"), v.GetInt("redis.port"), v.GetString("redis.password")))
+
 	// rsa
-	osv.Rsa.Init(OsRSA(v.GetString("secret.public_key"), v.GetString("secret.private_key")))
+	osv.Rsa.Init(RSA(v.GetString("secret.public_key"), v.GetString("secret.private_key")))
 
 	srv := server.New(server.NewConfig().
 		SetDebug(v.GetBool("server.debug")).
