@@ -1,0 +1,14 @@
+server:
+  host: 0.0.0.0
+  port: 8000
+
+
+logger:
+  file:
+    path: ./logs  # 日志文件存放路径
+    name: open-admin.log  # 日志文件名称
+    level: error  # 日志文件记录级别
+    max-size: 1024  # 日志文件达到的最大大小,以MB为单位
+    max-backups: 30  # 留存的旧日志文件最大数量
+    max-age: 7  # 旧日志文件的最大保存天数
+    compress: false   # 是否压缩日志文件
