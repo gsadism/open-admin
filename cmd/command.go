@@ -4,12 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gsadism/open-admin/core"
-	"github.com/gsadism/open-admin/logging"
 	"github.com/gsadism/open-admin/pkg/object"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -33,26 +31,6 @@ func readApplicationFile(path string) (*viper.Viper, error) {
 	return v, nil
 }
 
-// folder : 获取路径
-func folder(path string) string {
-	if !filepath.IsAbs(path) {
-		if d, err := filepath.Abs(path); err != nil {
-			core.Exit(err.Error())
-		} else {
-			path = d
-		}
-	}
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			// 创建路径
-			if err := os.MkdirAll(path, os.ModePerm); err != nil {
-				core.Exit(err.Error())
-			}
-		}
-	}
-	return path
-}
-
 // bindFlags : 绑定命令行参数
 func bindFlags(c *cobra.Command) *cobra.Command {
 	c.PersistentFlags().StringVarP(&flags.ConfFilePath, "conf", "", "", "config file path")
@@ -72,20 +50,14 @@ func command() *cobra.Command {
 
 			if flags.ConfFilePath == "" {
 				// 使用默认配置
+				srv := core.Default()
+				srv.ListenAndServer()
 			} else {
 				if v, err := readApplicationFile(flags.ConfFilePath); err != nil {
 					core.Exit(err.Error())
 				} else {
-					logging.ReplaceGlobals(logging.New().SetSkip(2).File(
-						folder(v.GetString("logger.file.path")),
-						object.Default[string](v.GetString("logger.file.name"), "open-admin.log"),
-						v.GetString("logger.file.level"),
-						v.GetInt("logger.file.max-size"),
-						v.GetInt("logger.file.max-age"),
-						v.GetInt("logger.file.max-backups"),
-						v.GetBool("logger.file.compress"),
-					).R())
-
+					srv := core.New(v)
+					srv.ListenAndServer()
 				}
 			}
 		},
