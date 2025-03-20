@@ -2,6 +2,21 @@
 
 
 
+>**约定**
+>
+>- [arg1 | arg2] 为可选参数
+
+## 启动方式
+
+~~~bash
+go run main.go [server] # 使用系统默认配置方式启动
+
+go run main.go [server] --conf=./application.yml --log=debug # 指定启动方式
+~~~
+
+- `--conf`: 制定系统配置文件
+- `--log`: 控制台日志输出级别 [debug、info、warn、error]
+
 
 
 ## 环境变量
