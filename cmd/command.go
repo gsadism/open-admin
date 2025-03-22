@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/gsadism/open-admin/conf"
 	"github.com/gsadism/open-admin/core"
 	"github.com/gsadism/open-admin/pkg/object"
 	"github.com/spf13/cobra"
@@ -50,13 +51,17 @@ func command() *cobra.Command {
 
 			if flags.ConfFilePath == "" {
 				// 使用默认配置
-				srv := core.Default()
+				srv := core.Default().
+					Middleware(conf.MIDDLEWARE...).
+					Routers(conf.ROUTERS...)
 				srv.ListenAndServer()
 			} else {
 				if v, err := readApplicationFile(flags.ConfFilePath); err != nil {
 					core.Exit(err.Error())
 				} else {
-					srv := core.New(v)
+					srv := core.New(v).
+						Middleware(conf.MIDDLEWARE...).
+						Routers(conf.ROUTERS...)
 					srv.ListenAndServer()
 				}
 			}

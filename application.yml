@@ -4,6 +4,8 @@ server:
 
   debug: true
 
+website:
+  favicon-ico: ./public/favicon.ico  # 网站icon
 
 logger:
   file:
